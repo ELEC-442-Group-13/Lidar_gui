@@ -7,7 +7,7 @@ import serial
 import time
 
 
-LIDAR_PORT = "/dev/ttyUSB1"
+LIDAR_PORT = "/dev/ttyUSB0"
 BAUD_RATE = 115200
 
 
