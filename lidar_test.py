@@ -13,20 +13,14 @@ from datetime import datetime
 import pytz
 
 # Find available serial ports
-ports = serial.tools.list_ports.comports(include_links=False)
+ser_port = "/dev/ttyUSB1"
 baudrate = 115200  # Baudrate setting
 
-ser_port = None
-for port in ports:
-    if port.vid == 1027:  # FTDI VID 1027
-        ser_port = port.device
-        print("Sensor found at:", ser_port)
-
-if ser_port is None:
-    raise Exception("No sensor found. Check connection!")
-
-# Initialize serial connection
-sensor = serial.Serial(ser_port, baudrate, timeout=1)
+try:
+    sensor = serial.Serial(ser_port, baudrate, timeout=1)
+except:
+    print("Lidar sensor not found, exiting...")
+    exit()
 
 # Lock for thread synchronization
 lock = threading.Lock()
@@ -34,17 +28,8 @@ lock = threading.Lock()
 # Buffer for storing received data
 data_buffer = deque(maxlen=100)
 
-# Create the figure for plotting
-fig, ax = plt.subplots()
-
-# Initialize the heatmap with zeros
-cmap = 'Greens'  # Initial colormap
-heatmap = ax.imshow(np.zeros((8, 8)), cmap=cmap, vmin=0, vmax=400)
-plt.colorbar(heatmap)
-
 # List to keep track of the text annotations
 text_annotations = []
-
 
 #time zone for logging
 pacific_tz = pytz.timezone('America/Los_Angeles')
@@ -98,6 +83,7 @@ def update(frame):
         if len(data_buffer) > 0:
             new_values = data_buffer[-1]  # Get latest sensor data
             heatmap.set_array(new_values)
+            return new_values
         # Display values on each square of the heatmap
     for text in text_annotations:
         text.remove()
@@ -127,13 +113,7 @@ def change_cmap():
 serial_thread = threading.Thread(target=read_serial, daemon=True)
 serial_thread.start()
 
-# Create the Tkinter root window
-root = tk.Tk()
-root.title("Sensor Heatmap Control")
-
-# Create the Tkinter button to change colormap
-button = tk.Button(root, text="Change Colormap", command=change_cmap)
-button.pack()
+"""
 
 #Add button to start datalog
 button_log = tk.Button(root, text="startlog", command=start_log)
@@ -142,13 +122,6 @@ button_log.pack()
 #Add button to end datalog
 button_e = tk.Button(root, text="endlog", command=end_log)
 button_e.pack()
+"""
 
-# Embed the Matplotlib figure into Tkinter
-canvas = FigureCanvasTkAgg(fig, master=root)  
-canvas.get_tk_widget().pack()
-
-# Create the animation
-ani = animation.FuncAnimation(fig, update, interval=10, blit=False)
-
-# Start Tkinter mainloop
-root.mainloop()
+read_serial()
