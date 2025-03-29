@@ -1,16 +1,9 @@
+"""
+Object for getting samples from our lidar module. Samples are read from the module using an STM32, which in turn communicates
+with this script to get data.
+"""
+
 import serial
-import serial.tools.list_ports
-import numpy as np
-import threading
-from collections import deque
-import matplotlib.animation as animation
-import matplotlib.pyplot as plt
-import tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import csv
-from csv import writer
-from datetime import datetime
-import pytz
 import time
 
 
@@ -18,10 +11,10 @@ LIDAR_PORT = "/dev/ttyUSB1"
 BAUD_RATE = 115200
 
 
-# LidarSensor class definition
 class LidarSensor:
 
     def __init__(self):
+
         self.ser = None
         self.port = LIDAR_PORT
         self.baudrate = BAUD_RATE
@@ -49,7 +42,7 @@ class LidarSensor:
 if __name__ == "__main__":
 
     lidar = LidarSensor()
-    
+
     while (1):
         data = lidar.get_reading()
         print(data)
